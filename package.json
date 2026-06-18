@@ -1,7 +1,6 @@
 {
-  "name": "@threadbase/agent-types",
+  "name": "@threadbase-sh/agent-types",
   "version": "0.1.0",
-  "private": true,
   "description": "Shared wire types for the Threadbase multi-agent pipeline (tb-multi-agent ↔ tb-streamer).",
   "license": "MIT",
   "repository": {
@@ -11,8 +10,18 @@
   "bugs": {
     "url": "https://github.com/RonenMars/threadbase-agent-types/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": ["dist", "src", "README.md"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -20,6 +29,10 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
+    "semantic-release": "^25.0.5",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   }
