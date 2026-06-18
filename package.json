@@ -1,5 +1,5 @@
 {
-  "name": "@threadbase/agent-types",
+  "name": "@threadbase-sh/agent-types",
   "version": "0.1.0",
   "description": "Shared wire types for the Threadbase multi-agent pipeline (tb-multi-agent ↔ tb-streamer).",
   "license": "MIT",
