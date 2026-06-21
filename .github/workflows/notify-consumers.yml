@@ -1,0 +1,34 @@
+name: Notify consumers on release tag
+
+# When a version tag (v*) is pushed to this repo (semantic-release tags the
+# release), notify the repos that depend on @threadbase-sh/agent-types so they
+# can bump the dep to the new version and open a PR.
+#
+# Requires a repository secret CONSUMER_DISPATCH_PAT: a Personal Access Token
+# with "repo" scope (or fine-grained: Contents read/write on both
+# RonenMars/threadbase-streamer and RonenMars/tb-multi-agent). The default
+# GITHUB_TOKEN cannot dispatch across repositories.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    name: Dispatch agent-types-released to consumers
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - RonenMars/threadbase-streamer
+          - RonenMars/tb-multi-agent
+    steps:
+      - name: Send repository_dispatch
+        env:
+          GH_TOKEN: ${{ secrets.CONSUMER_DISPATCH_PAT }}
+          REPO: ${{ matrix.repo }}
+        run: |
+          gh api -X POST "repos/$REPO/dispatches" \
+            -f event_type=agent-types-released
