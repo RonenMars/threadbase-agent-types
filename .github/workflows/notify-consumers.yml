@@ -26,10 +26,32 @@ jobs:
           - RonenMars/threadbase-streamer
           - RonenMars/threadbase-multi-agent-orchestration
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve release tag
+        id: tag
+        # On a tag push, use the pushed tag. On manual dispatch (no tag ref),
+        # fall back to the latest v* tag. Consumers pin to this exact version.
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          if [ "$tag" = "$GITHUB_REF" ]; then
+            tag=$(git tag -l 'v*' | sort -V | tail -1)
+          fi
+          if [ -z "$tag" ]; then echo "::error::no v* tag found"; exit 1; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Dispatching version $tag"
+
       - name: Send repository_dispatch
         env:
           GH_TOKEN: ${{ secrets.CONSUMER_DISPATCH_PAT }}
           REPO: ${{ matrix.repo }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        # client_payload carries the tag so consumers pin to the exact released
+        # version rather than resolving "latest" themselves.
         run: |
           gh api -X POST "repos/$REPO/dispatches" \
-            -f event_type=agent-types-released
+            -f event_type=agent-types-released \
+            -f "client_payload[tag]=$TAG"
