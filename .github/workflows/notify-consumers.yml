@@ -6,7 +6,8 @@ name: Notify consumers on release tag
 #
 # Requires a repository secret CONSUMER_DISPATCH_PAT: a Personal Access Token
 # with "repo" scope (or fine-grained: Contents read/write on both
-# RonenMars/threadbase-streamer and RonenMars/tb-multi-agent). The default
+# RonenMars/threadbase-streamer and
+# RonenMars/threadbase-multi-agent-orchestration). The default
 # GITHUB_TOKEN cannot dispatch across repositories.
 on:
   push:
@@ -23,7 +24,7 @@ jobs:
       matrix:
         repo:
           - RonenMars/threadbase-streamer
-          - RonenMars/tb-multi-agent
+          - RonenMars/threadbase-multi-agent-orchestration
     steps:
       - name: Send repository_dispatch
         env:
