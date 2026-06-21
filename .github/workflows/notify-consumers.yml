@@ -1,0 +1,57 @@
+name: Notify consumers on release tag
+
+# When a version tag (v*) is pushed to this repo (semantic-release tags the
+# release), notify the repos that depend on @threadbase-sh/agent-types so they
+# can bump the dep to the new version and open a PR.
+#
+# Requires a repository secret CONSUMER_DISPATCH_PAT: a Personal Access Token
+# with "repo" scope (or fine-grained: Contents read/write on both
+# RonenMars/threadbase-streamer and
+# RonenMars/threadbase-multi-agent-orchestration). The default
+# GITHUB_TOKEN cannot dispatch across repositories.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    name: Dispatch agent-types-released to consumers
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - RonenMars/threadbase-streamer
+          - RonenMars/threadbase-multi-agent-orchestration
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve release tag
+        id: tag
+        # On a tag push, use the pushed tag. On manual dispatch (no tag ref),
+        # fall back to the latest v* tag. Consumers pin to this exact version.
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          if [ "$tag" = "$GITHUB_REF" ]; then
+            tag=$(git tag -l 'v*' | sort -V | tail -1)
+          fi
+          if [ -z "$tag" ]; then echo "::error::no v* tag found"; exit 1; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Dispatching version $tag"
+
+      - name: Send repository_dispatch
+        env:
+          GH_TOKEN: ${{ secrets.CONSUMER_DISPATCH_PAT }}
+          REPO: ${{ matrix.repo }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        # client_payload carries the tag so consumers pin to the exact released
+        # version rather than resolving "latest" themselves.
+        run: |
+          gh api -X POST "repos/$REPO/dispatches" \
+            -f event_type=agent-types-released \
+            -f "client_payload[tag]=$TAG"
