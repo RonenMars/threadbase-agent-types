@@ -1,6 +1,6 @@
 // packages/agent-types/test/signal.test.ts
 import { describe, expect, it } from 'vitest';
-import type { ConversationTurn, UserInputSignal } from '../src/signal';
+import type { ConversationTurn, GateAnswerSignal, UserInputSignal } from '../src/signal';
 
 describe('ConversationTurn', () => {
   it('accepts a user turn', () => {
@@ -35,5 +35,12 @@ describe('UserInputSignal', () => {
       conversationHistory: [],
     };
     expect(sig.conversationHistory).toEqual([]);
+  });
+});
+
+describe('GateAnswerSignal', () => {
+  it('carries the gate id and the chosen option index', () => {
+    const sig: GateAnswerSignal = { gateId: 'gate_1', optionIndex: 1 };
+    expect(sig).toEqual({ gateId: 'gate_1', optionIndex: 1 });
   });
 });

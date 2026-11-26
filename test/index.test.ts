@@ -26,6 +26,9 @@ import type {
   ConversationTurn,
   UserInputSignal,
   SessionStageAddendum,
+  GateOpenPayload,
+  GateClosedPayload,
+  GateAnswerSignal,
 } from '../src/index';
 
 describe('type re-exports', () => {
@@ -42,7 +45,10 @@ describe('type re-exports', () => {
     const turn: ConversationTurn = { role: 'user', content: 'x' };
     const sig: UserInputSignal = { turnId: 't', prompt: 'p', conversationHistory: [] };
     const add: SessionStageAddendum = {};
+    const open: GateOpenPayload = { gateId: 'g', prompt: 'p', options: [] };
+    const closed: GateClosedPayload = { gateId: 'g', optionIndex: 0, timedOut: false };
+    const answer: GateAnswerSignal = { gateId: 'g', optionIndex: 0 };
 
-    expect({ stage, eventType, ev, out, turn, sig, add }).toBeDefined();
+    expect({ stage, eventType, ev, out, turn, sig, add, open, closed, answer }).toBeDefined();
   });
 });

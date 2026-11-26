@@ -4,6 +4,8 @@ import type {
   ProgressEvent,
   ProgressEventType,
   AgentOutputPayload,
+  GateOpenPayload,
+  GateClosedPayload,
 } from '../src/progress';
 import type { Stage } from '../src/stage';
 
@@ -90,5 +92,35 @@ describe('AgentOutputPayload', () => {
       reviewerOverruled: true,
     };
     expect(p.reviewerOverruled).toBe(true);
+  });
+});
+
+describe('gate events', () => {
+  it('accepts a gate_open event with its payload', () => {
+    const payload: GateOpenPayload = {
+      gateId: 'gate_1',
+      prompt: 'Release this answer?',
+      detail: 'The reviewer approved it.',
+      options: ['Approve', 'Request changes', 'Stop'],
+    };
+    const type: ProgressEventType = 'gate_open';
+    const ev: ProgressEvent = {
+      sessionId: 's', turnId: 't', eventId: 'e', seq: 4, type, stage: 'sign-off', timestamp: 0,
+      payload: payload as unknown as Record<string, unknown>,
+    };
+    expect(ev.payload?.gateId).toBe('gate_1');
+  });
+
+  it('accepts a gate_open without detail', () => {
+    const payload: GateOpenPayload = { gateId: 'g', prompt: 'p', options: ['Yes'] };
+    expect(payload.detail).toBeUndefined();
+  });
+
+  it('accepts a gate_closed event, answered or timed out', () => {
+    const answered: GateClosedPayload = { gateId: 'g', optionIndex: 0, timedOut: false };
+    const timedOut: GateClosedPayload = { gateId: 'g', optionIndex: 2, timedOut: true };
+    const type: ProgressEventType = 'gate_closed';
+    expect([answered, timedOut].map((p) => p.timedOut)).toEqual([false, true]);
+    expect(type).toBe('gate_closed');
   });
 });

@@ -2,7 +2,7 @@
 import type { Stage } from './stage';
 
 /**
- * The three event kinds the worker may emit to tb-streamer over the webhook.
+ * The event kinds the worker may emit to tb-streamer over the webhook.
  *
  * - stage_transition: the workflow has moved to a new stage. Carries `stage`,
  *   and `reworkAttempt` when `stage === 'rework'`.
@@ -11,11 +11,18 @@ import type { Stage } from './stage';
  *   `AgentOutputPayload` in `payload`.
  * - terminal_failure: the turn has failed and will not produce more output.
  *   Carries a free-form reason in `payload`.
+ * - gate_open: the turn is waiting for a human answer. Carries a
+ *   `GateOpenPayload`; the answer comes back as a `gateAnswer` signal.
+ * - gate_closed: that gate was answered or timed out. Carries a
+ *   `GateClosedPayload`. The turn still ends with `agent_output` at `done`
+ *   or with `terminal_failure`.
  */
 export type ProgressEventType =
   | 'stage_transition'
   | 'agent_output'
-  | 'terminal_failure';
+  | 'terminal_failure'
+  | 'gate_open'
+  | 'gate_closed';
 
 /**
  * The envelope worker activities POST to tb-streamer's webhook receiver.
@@ -59,4 +66,30 @@ export interface AgentOutputPayload {
   content: string;
   partial?: boolean;
   reviewerOverruled?: boolean;
+}
+
+/**
+ * Payload of a `gate_open` event. Stored in `ProgressEvent.payload`.
+ *
+ * - `gateId` is unique per gate opening; a reworked turn asks again under a
+ *   new id, and an answer naming an old one is dropped.
+ * - `options` are the button labels; the answer names one by its index.
+ */
+export interface GateOpenPayload {
+  gateId: string;
+  prompt: string;
+  detail?: string;
+  options: string[];
+}
+
+/**
+ * Payload of a `gate_closed` event. Stored in `ProgressEvent.payload`.
+ *
+ * - `optionIndex` is the option taken: the answer, or the gate's timeout
+ *   default when `timedOut` is true.
+ */
+export interface GateClosedPayload {
+  gateId: string;
+  optionIndex: number;
+  timedOut: boolean;
 }

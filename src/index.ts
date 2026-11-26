@@ -7,11 +7,14 @@ export type {
   ProgressEvent,
   ProgressEventType,
   AgentOutputPayload,
+  GateOpenPayload,
+  GateClosedPayload,
 } from './progress';
 
 export type {
   ConversationTurn,
   UserInputSignal,
+  GateAnswerSignal,
 } from './signal';
 
 export type { SessionStageAddendum } from './session';

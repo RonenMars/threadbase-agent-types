@@ -32,3 +32,12 @@ export interface UserInputSignal {
   prompt: string;
   conversationHistory: ConversationTurn[];
 }
+
+/**
+ * Payload of the `gateAnswer` signal tb-streamer sends when the user answers
+ * a `gate_open` card. `optionIndex` indexes `GateOpenPayload.options`.
+ */
+export interface GateAnswerSignal {
+  gateId: string;
+  optionIndex: number;
+}
