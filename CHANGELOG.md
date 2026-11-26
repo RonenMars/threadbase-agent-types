@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/RonenMars/threadbase-agent-types/compare/v1.0.0...v1.1.0) (2026-11-26)
+
+### Features
+
+* **progress:** add gate events and the gate answer signal ([#11](https://github.com/RonenMars/threadbase-agent-types/issues/11)) ([7b19b06](https://github.com/RonenMars/threadbase-agent-types/commit/7b19b0693475d972797d38f47984363de4b37460))
+
 ## 1.0.0 (2026-06-21)
 
 ### Features
